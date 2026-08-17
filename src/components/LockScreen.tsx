@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, UserCheck, Lock, ArrowRight, Eye, Film } from 'lucide-react';
 import type { UserRole } from '../types/setgear';
+import { store } from '../services/store';
 import { APP_NOME, APP_VERSAO_LABEL } from '../config/app';
 
 interface LockScreenProps {
@@ -17,14 +18,24 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onAuthenticate }) => {
     e.preventDefault();
     setErrorMessage(null);
 
+    // A senha vem do store, e não de uma comparação escrita aqui.
+    //
+    // Esta tela comparava com 'admin123' e 'op123' chumbados, ignorando o que a
+    // primeira configuração havia salvo. Duas consequências: a senha escolhida
+    // pelo usuário nunca era usada para entrar, e 'admin123' abria o app mesmo
+    // depois de trocada. O SettingsView já fazia o certo — era esta tela que
+    // estava fora do padrão.
+    //
+    // Segue valendo que a senha mora em texto puro no localStorage: quem abre o
+    // DevTools lê. Isso é da Fase 2, com autenticação de verdade.
     if (selectedRole === 'admin') {
-      if (password !== 'admin123') {
-        setErrorMessage('Senha incorreta para acesso ADMINISTRADOR! (Senha padrão: admin123)');
+      if (!store.validatePassword('admin', password)) {
+        setErrorMessage('Senha incorreta para acesso ADMINISTRADOR.');
         return;
       }
     } else if (selectedRole === 'operador') {
-      if (password !== 'op123') {
-        setErrorMessage('Senha incorreta para acesso OPERADOR! (Senha padrão: op123)');
+      if (!store.validatePassword('operador', password)) {
+        setErrorMessage('Senha incorreta para acesso OPERADOR.');
         return;
       }
       if (!operatorName.trim()) {
@@ -155,10 +166,11 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onAuthenticate }) => {
           {(selectedRole === 'admin' || selectedRole === 'operador') && (
             <div>
               <label className="block text-white mb-1 font-bold flex items-center justify-between">
+                {/* A dica mostrava a senha padrão em tela. Fazia algum sentido
+                    enquanto o login a comparava chumbada; agora que ele respeita
+                    a senha configurada, a dica estaria mentindo — e exibir senha
+                    na tela de entrada é ruim de qualquer jeito. */}
                 <span>Senha de Acesso:</span>
-                <span className="text-[10px] text-[#B0B0B0]">
-                  {selectedRole === 'admin' ? '(admin123)' : '(op123)'}
-                </span>
               </label>
               <input
                 type="password"
