@@ -498,13 +498,24 @@ Usar no **shell**, não no fluxo de trabalho:
 
 ## 8. Fases de execução
 
-### Fase 0 — Fundação
-- ✅ Pasta `.md/` com o material antigo + `CONTEXTO.md` para a IA. `.gitignore` criado.
-- `git init`, primeiro commit do estado atual, repo próprio `SetGear` no GitHub.
-- Alinhar toolchain com o SetProd: React 19, Vite 8, TS 6, `oxlint`, `vite-plugin-pwa`.
-- **Constante `APP_NOME` única** — o nome vai mudar (§9.5). Limpar os três nomes vivos.
-- Manifest PWA próprio; validar instalação no Android e iOS.
-- Deploy na Vercel + `.env.example`.
+### Fase 0 — Fundação  *(quase concluída)*
+- ✅ Pasta `.md/` com o material antigo + `CONTEXTO.md` para a IA. `.gitignore` + `.gitattributes`.
+- ✅ `git init` e baseline commitado (`8fec827`), para que os upgrades sejam reversíveis.
+- ✅ Toolchain alinhado ao SetProd: React 19.2, Vite 8, TS 6, `oxlint`, `vite-plugin-pwa` (`a8745be`).
+  Rendeu 72 erros de compilação — 47 mecânicos, 25 de código morto real. Build e lint sem avisos.
+- ✅ `APP_NOME` / `APP_VERSAO` em `src/config/app.ts`. A versão agora vem do
+  `package.json` no build; antes `v1.2.0` estava escrito à mão em 4 telas enquanto
+  o `package.json` dizia `1.0.0`.
+- ✅ Manifest PWA + service worker gerando (`sw.js`, `manifest.webmanifest`), favicon próprio.
+- ✅ `.env.example`.
+- ⬜ Repo `SetGear` no GitHub (**depende de você** — ver §9b).
+- ⬜ Deploy na Vercel; validar instalação do PWA no Android e iOS.
+
+**Código morto encontrado no caminho** (registrado porque é sintoma, não acidente):
+`TacticalCard` recebia `userRole` e nunca usava — quem decide permissão é
+`store.canUserEditEquipment()`. A prop sugeria controle por papel no card, e não
+havia. Mesmo padrão em `HeaderNavbar.activeView`, `ProjectManagerView.equipments`
+e `ExportReportModal.activePhase`: passados e ignorados. Removidos.
 
 ### Fase 1 — Trocar o store pelo Dexie
 O maior pedaço, e o que destrava todo o resto.
