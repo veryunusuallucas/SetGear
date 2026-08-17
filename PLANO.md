@@ -517,15 +517,35 @@ Usar no **shell**, não no fluxo de trabalho:
 havia. Mesmo padrão em `HeaderNavbar.activeView`, `ProjectManagerView.equipments`
 e `ExportReportModal.activePhase`: passados e ignorados. Removidos.
 
-### Fase 1 — Trocar o store pelo Dexie
-O maior pedaço, e o que destrava todo o resto.
-- Portar `store.ts` (616 linhas, singleton + localStorage) para Dexie +
-  `useLiveQuery`, **atrás da mesma interface pública** — a UI não muda nesta fase.
-- Corrigir dívida nº 2: `diaria_itens_status` com chave composta `[diaria_id+equipamento_id]`.
-- Corrigir dívida nº 1: múltiplas diárias com histórico. Nada é apagado ao trocar de data.
-- Migração one-shot do localStorage (`lumavi_setgear_*_v4`) → Dexie, com backup JSON antes.
-- Adotar `EVENTO_ALTERACAO` e os hooks de carimbo do SetProd.
-- **Testes começam aqui**: cascata de container e travas de fase são as regras que mais doem se quebrarem.
+### Fase 1 — Trocar o store pelo Dexie  ✅ *(concluída — `881c02a`)*
+- ✅ `store.ts` portado para Dexie. **Duas camadas**: o Dexie é durável, um
+  espelho em memória atende as leituras sincronizadas. Foi o espelho que
+  permitiu trocar toda a persistência **sem tocar em nenhum dos 17 componentes**.
+- ✅ Dívida nº 2: chave composta `[diaria_id+equipamento_id]` em `diaria_itens_status`.
+- ✅ Dívida nº 1: múltiplas diárias com histórico. Trocar de data não apaga mais nada.
+- ✅ Migração do localStorage com **backup cru antes de qualquer escrita**, sem
+  apagar as chaves antigas, idempotente. Reconstrói uma diária para o status órfão.
+- ✅ **26 testes** (vitest + fake-indexeddb): cascata de container, travas de fase,
+  isolamento entre diárias, persistência, leitura de QR, permissão.
+- ✅ `SeletorDiaria` — ver lacuna abaixo.
+- ⬜ `EVENTO_ALTERACAO` e os hooks de carimbo do SetProd: ficam para a Fase 2,
+  onde servem ao sync (aqui não teriam a quem avisar).
+
+**Correção do diagnóstico:** eu descrevi as dívidas nº 1 e nº 2 como bugs *em
+produção* — "o status de ontem contamina a diária de hoje". **Não era o caso.**
+Nenhum componente chamava `setDailyDate()`, então havia uma diária só,
+alcançável, para sempre — e sem uma segunda diária não havia colisão. Eram bugs
+**latentes**. O que os torna urgentes é a Fase 2: quando as diárias vierem do
+SetProd, existir várias deixa de ser hipótese.
+
+**A lacuna que isso revelou, essa sim real:** um projeto com três datas de
+gravação só deixava usar a primeira. Daí o `SeletorDiaria`, que troca a diária
+ativa e mostra quantos equipamentos cada uma tem. Ele lê do store, então a Fase 2
+troca a *fonte* das diárias sem invalidá-lo.
+
+**Também corrigido:** a migração relatava "chave corrompida" quando simplesmente
+não havia `localStorage` (Node, ou navegador com armazenamento bloqueado). Log
+que mente manda procurar defeito onde não há.
 
 ### Fase 2 — Sync, Auth e a ponte
 - Copiar `sync.ts` / `sincronizacao.ts` do SetProd. Não reescrever.
