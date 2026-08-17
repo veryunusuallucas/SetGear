@@ -44,9 +44,12 @@ import {
 import { 
   BottomNavigation 
 } from './components/BottomNavigation';
-import { 
-  AlertDialog 
+import {
+  AlertDialog
 } from './components/AlertDialog';
+import {
+  SeletorDiaria
+} from './components/SeletorDiaria';
 
 import { store } from './services/store';
 import type { 
@@ -54,7 +57,8 @@ import type {
   DailyPhase, 
   ItemLocationStatus,
   UserRole,
-  ActiveView
+  ActiveView,
+  Diaria
 } from './types/setgear';
 import { 
   Truck, 
@@ -77,6 +81,7 @@ export function App() {
 
   const [equipments, setEquipments] = useState<Equipamento[]>(store.getDailyEquipments());
   const [masterEquipments, setMasterEquipments] = useState<Equipamento[]>(store.getMasterEquipments());
+  const [dailies, setDailies] = useState<Diaria[]>(store.getDailiesForActiveProject());
   const [activeUser, setActiveUser] = useState(store.getActiveUser());
   const [userRole, setUserRole] = useState<UserRole>(store.getActiveUser().cargo);
   const [activePhase, setActivePhase] = useState<DailyPhase>('saida');
@@ -110,6 +115,7 @@ export function App() {
     const unsubscribe = store.subscribe(() => {
       setEquipments(store.getDailyEquipments());
       setMasterEquipments(store.getMasterEquipments());
+      setDailies(store.getDailiesForActiveProject());
       setActiveUser(store.getActiveUser());
       setUserRole(store.getActiveUser().cargo);
     });
@@ -314,6 +320,7 @@ export function App() {
                   </p>
                 </div>
 
+
                 {/* BOTÃO EXPORTAR PDF AZUL VIBRANTE #00A3FF INTELIGENTE */}
                 <div className="flex items-center gap-2">
                   <button
@@ -325,6 +332,22 @@ export function App() {
                     <span>EXPORTAR RELATÓRIO PDF</span>
                   </button>
                 </div>
+              </div>
+
+              {/* TROCA DE DIÁRIA DENTRO DO PROJETO */}
+              <div className="pt-1 border-t border-[#2a2a2a]">
+                <SeletorDiaria
+                  datasPrevistas={project.diarias_datas ?? []}
+                  diariasExistentes={dailies}
+                  dataAtiva={daily.data_diaria}
+                  onSelecionar={(data) => {
+                    store.setDailyDate(data);
+                    // A fase volta para SAÍDA: a diária escolhida tem a própria
+                    // conferência, e herdar "estou na volta" da anterior faria a
+                    // tela abrir numa fase que esta diária talvez nem alcançou.
+                    setActivePhase('saida');
+                  }}
+                />
               </div>
 
             </div>
