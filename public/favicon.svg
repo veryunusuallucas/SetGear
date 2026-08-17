@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#121212"/>
+  <!-- Case/mala: o objeto central do app é o container que viaja para o set -->
+  <rect x="12" y="20" width="40" height="28" rx="5" fill="none" stroke="#00A3FF" stroke-width="3.5"/>
+  <path d="M25 20v-4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4" fill="none" stroke="#00A3FF" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Check: conferido -->
+  <path d="M22 34l7 7 13-13" fill="none" stroke="#2ED5A0" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

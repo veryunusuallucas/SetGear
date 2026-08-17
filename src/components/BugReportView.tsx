@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bug, Send, CheckCircle2, Copy, FileText } from 'lucide-react';
 import { store } from '../services/store';
-import { BugReport } from '../types/setgear';
+import type { BugReport } from '../types/setgear';
 
 interface BugReportViewProps {
   onBackToApp: () => void;

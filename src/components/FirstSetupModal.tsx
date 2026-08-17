@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Shield, Key, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { store } from '../services/store';
+import { APP_NOME } from '../config/app';
 
 interface FirstSetupModalProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export const FirstSetupModal: React.FC<FirstSetupModalProps> = ({ isOpen, onComp
             SG
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-white">
-            Bem-vindo ao Lumavi SetGear
+            Bem-vindo ao {APP_NOME}
           </h2>
           <p className="text-sm text-[#B0B0B0] font-medium">
             Primeira Inicialização: Crie as senhas que serão usadas para os acessos ADMIN e OPERADOR.

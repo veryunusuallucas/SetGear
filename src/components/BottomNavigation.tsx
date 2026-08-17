@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layers, Database, Settings, Bug } from 'lucide-react';
-import { ActiveView } from '../types/setgear';
+import type { ActiveView } from '../types/setgear';
 
 interface BottomNavigationProps {
   activeView: ActiveView;

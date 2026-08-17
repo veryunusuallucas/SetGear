@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Unlock, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Lock, Unlock, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 interface WrapProgressBarProps {
   percent: number;

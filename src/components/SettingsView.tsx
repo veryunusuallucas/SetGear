@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Shield, 
-  UserCheck, 
-  Eye, 
-  Lock, 
+  Shield,
+  UserCheck,
+  Eye,
   ArrowLeft,
-  CheckCircle2,
-  Key
+  CheckCircle2
 } from 'lucide-react';
-import { UserRole, Profile } from '../types/setgear';
+import type { UserRole, Profile } from '../types/setgear';
 import { store } from '../services/store';
 
 interface SettingsViewProps {

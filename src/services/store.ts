@@ -1,4 +1,4 @@
-import { 
+import type { 
   Equipamento, 
   Projeto, 
   Diaria, 
@@ -211,7 +211,14 @@ export class SetGearStore {
       if (savedBugs) {
         this.bugReports = JSON.parse(savedBugs);
       }
-    } catch (e) {
+    } catch (erro) {
+      // Um JSON corrompido em qualquer uma das seis chaves cai aqui e o
+      // inventário inteiro é trocado pelos dados de demonstração. Antes isso
+      // acontecia em silêncio: quem perdesse o acervo não teria como saber por
+      // quê. O registro no console é o mínimo — a Fase 1 troca o localStorage
+      // pelo Dexie e passa a tratar cada chave em separado, para que uma falha
+      // não leve o resto junto.
+      console.error('[SetGear] Falha ao ler os dados salvos; o acervo voltou ao padrão.', erro);
       this.equipments = INITIAL_EQUIPMENT;
     }
   }

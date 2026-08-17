@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Shield, UserCheck, Lock, ArrowRight, Eye, Film, CheckCircle2 } from 'lucide-react';
-import { UserRole } from '../types/setgear';
+import { Shield, UserCheck, Lock, ArrowRight, Eye, Film } from 'lucide-react';
+import type { UserRole } from '../types/setgear';
+import { APP_NOME, APP_VERSAO_LABEL } from '../config/app';
 
 interface LockScreenProps {
   onAuthenticate: (role: UserRole, userName: string) => void;
@@ -32,7 +33,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onAuthenticate }) => {
       }
     }
 
-    const finalName = selectedRole === 'admin' ? 'Administrador Lumavi' : selectedRole === 'visualizador' ? 'Visualizador (Convidado)' : operatorName.trim();
+    const finalName = selectedRole === 'admin' ? 'Administrador' : selectedRole === 'visualizador' ? 'Visualizador (Convidado)' : operatorName.trim();
     onAuthenticate(selectedRole, finalName);
   };
 
@@ -42,17 +43,17 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onAuthenticate }) => {
         
         {/* Badge Versão One UI */}
         <div className="absolute top-4 right-4 bg-[#2a2a2a] text-[#00A3FF] border border-[#383838] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-          v1.2.0
+          {APP_VERSAO_LABEL}
         </div>
 
-        {/* Marca Lumavi SetGear com ÍCONE DE ROLO DE FILME SOLICITADO */}
+        {/* Marca do app com ÍCONE DE ROLO DE FILME SOLICITADO */}
         <div className="text-center space-y-2 pt-2">
           <div className="w-16 h-16 bg-[#00A3FF] text-white rounded-2xl flex items-center justify-center font-bold shadow-lg mx-auto transform hover:rotate-6 transition-transform">
             <Film className="w-9 h-9" />
           </div>
           
           <h1 className="text-2xl font-bold tracking-tight text-white mt-3">
-            Lumavi SetGear
+            {APP_NOME}
           </h1>
           <p className="text-xs text-[#B0B0B0] font-medium">
             Selecione o nível de acesso e digite a senha para entrar.
@@ -187,7 +188,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onAuthenticate }) => {
               type="submit"
               className="ui-btn-primary w-full py-4 text-sm font-bold shadow-lg flex items-center justify-center gap-2 uppercase tracking-wide"
             >
-              <span>ENTRAR NO LUMAVI SETGEAR</span>
+              <span>ENTRAR NO {APP_NOME.toUpperCase()}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -195,7 +196,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onAuthenticate }) => {
         </form>
 
         <div className="text-center pt-2 border-t border-[#2a2a2a] text-[11px] font-mono text-[#B0B0B0]">
-          Lumavi SetGear • Autenticação de Entrada v1.2.0
+          {APP_NOME} • Autenticação de Entrada {APP_VERSAO_LABEL}
         </div>
 
       </div>

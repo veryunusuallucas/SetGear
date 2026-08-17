@@ -11,7 +11,7 @@ import {
   RotateCcw,
   Check
 } from 'lucide-react';
-import { Equipamento, ItemLocationStatus, BatteryStatus, UserRole, DailyPhase } from '../types/setgear';
+import type { Equipamento, ItemLocationStatus, UserRole, DailyPhase } from '../types/setgear';
 import { TacticalCard } from './TacticalCard';
 
 interface ContainerCardProps {
@@ -141,7 +141,6 @@ export const ContainerCard: React.FC<ContainerCardProps> = ({
               <TacticalCard
                 key={item.id}
                 item={item}
-                userRole={userRole}
                 activePhase={activePhase}
                 onUpdateLocation={onUpdateLocation}
                 onBatteryCheckPrompt={onBatteryCheckPrompt}

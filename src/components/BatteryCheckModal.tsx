@@ -1,6 +1,6 @@
 import React from 'react';
-import { Battery, BatteryCharging, Check, AlertTriangle, X } from 'lucide-react';
-import { Equipamento } from '../types/setgear';
+import { BatteryCharging, Check, AlertTriangle, X } from 'lucide-react';
+import type { Equipamento } from '../types/setgear';
 
 interface BatteryCheckModalProps {
   isOpen: boolean;

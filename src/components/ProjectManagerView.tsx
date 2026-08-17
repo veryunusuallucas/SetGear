@@ -9,13 +9,13 @@ import {
   Lock,
   Layers
 } from 'lucide-react';
-import { Projeto, Veiculo, Equipamento } from '../types/setgear';
+import type { Projeto, Veiculo } from '../types/setgear';
+import { APP_VERSAO_LABEL } from '../config/app';
 import { store } from '../services/store';
 
 interface ProjectManagerViewProps {
   projects: Projeto[];
   activeProject: Projeto;
-  equipments: Equipamento[];
   onSelectProject: (id: string) => void;
   onEnterProjectDaily: (projectId: string) => void;
   onLockApp: () => void;
@@ -24,7 +24,6 @@ interface ProjectManagerViewProps {
 export const ProjectManagerView: React.FC<ProjectManagerViewProps> = ({
   projects,
   activeProject,
-  equipments,
   onSelectProject,
   onEnterProjectDaily,
   onLockApp,
@@ -40,7 +39,10 @@ export const ProjectManagerView: React.FC<ProjectManagerViewProps> = ({
   const [dpFotografia, setDpFotografia] = useState('');
   const [diretorArte, setDiretorArte] = useState('');
   const [gaffer, setGaffer] = useState('');
-  const [diariasCount, setDiariasCount] = useState(2);
+  // Sem setter de propósito: o formulário não tem campo para a quantidade de
+  // diárias, então ela é sempre 2. A Fase 2 passa a receber as diárias do
+  // SetProd — este campo tende a sair.
+  const [diariasCount] = useState(2);
   const [veiculosList] = useState<Veiculo[]>([
     { id: 'v-1', nome: 'Carro 1 - Van Câmera & Luz' },
     { id: 'v-2', nome: 'Carro 2 - Van Grip & Suportes' },
@@ -92,7 +94,7 @@ export const ProjectManagerView: React.FC<ProjectManagerViewProps> = ({
                 Project Manager
               </h2>
               <span className="text-[10px] font-mono px-2 py-0.5 bg-[#2a2a2a] text-[#00A3FF] border border-[#383838] rounded-full font-bold">
-                v1.2.0
+                {APP_VERSAO_LABEL}
               </span>
             </div>
             <p className="text-xs text-[#B0B0B0] font-medium mt-0.5">

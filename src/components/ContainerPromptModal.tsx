@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Layers, ArrowRight, X } from 'lucide-react';
-import { Equipamento } from '../types/setgear';
+import type { Equipamento } from '../types/setgear';
 
 interface ContainerPromptModalProps {
   isOpen: boolean;

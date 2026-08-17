@@ -4,15 +4,12 @@ import {
   Plus, 
   Trash2, 
   Search, 
-  Layers, 
-  Tag, 
-  Truck, 
+  Layers,
+  Tag,
   QrCode,
-  Lock,
-  Box,
-  CheckCircle2
+  Box
 } from 'lucide-react';
-import { Equipamento, UserRole } from '../types/setgear';
+import type { Equipamento, UserRole } from '../types/setgear';
 import { store } from '../services/store';
 
 interface InventoryManagerProps {

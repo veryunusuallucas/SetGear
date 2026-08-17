@@ -1,6 +1,6 @@
 import React from 'react';
-import { AlertTriangle, Lock, Unlock, X, ArrowRight } from 'lucide-react';
-import { Equipamento, DailyPhase } from '../types/setgear';
+import { AlertTriangle, Unlock, X } from 'lucide-react';
+import type { Equipamento, DailyPhase } from '../types/setgear';
 
 interface PendingAlertModalProps {
   isOpen: boolean;

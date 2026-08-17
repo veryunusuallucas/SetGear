@@ -5,14 +5,14 @@ import {
   Eye,
   UserCheck
 } from 'lucide-react';
-import { UserRole, ActiveView } from '../types/setgear';
+import type { UserRole, ActiveView } from '../types/setgear';
+import { APP_NOME, APP_VERSAO_LABEL } from '../config/app';
 
 interface HeaderNavbarProps {
   userRole: UserRole;
   userName: string;
   projectName: string;
   dailyDate: string;
-  activeView: ActiveView;
   onChangeView: (view: ActiveView) => void;
   onLockApp: () => void;
 }
@@ -22,7 +22,6 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
   userName,
   projectName,
   dailyDate,
-  activeView,
   onChangeView,
   onLockApp,
 }) => {
@@ -40,7 +39,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
 
       <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
         
-        {/* LOGO + VERSÃO v1.2.0 + BOTÃO ← PROJETOS */}
+        {/* LOGO + VERSÃO + BOTÃO ← PROJETOS */}
         <div className="flex items-center gap-3">
           <div 
             onClick={() => onChangeView('projects')}
@@ -51,9 +50,9 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="font-bold text-lg text-white tracking-tight">SetGear</h1>
+                <h1 className="font-bold text-lg text-white tracking-tight">{APP_NOME}</h1>
                 <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#2a2a2a] text-[#00A3FF] border border-[#383838] rounded-full font-bold">
-                  v1.2.0
+                  {APP_VERSAO_LABEL}
                 </span>
               </div>
               <p className="text-xs text-[#B0B0B0] truncate max-w-[160px] sm:max-w-[260px]">

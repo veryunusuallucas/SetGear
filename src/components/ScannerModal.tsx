@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { QrCode, X, Check, Camera, Box, Layers, Zap } from 'lucide-react';
 import { store } from '../services/store';
-import { DailyPhase } from '../types/setgear';
+import type { DailyPhase } from '../types/setgear';
 
 interface ScannerModalProps {
   isOpen: boolean;

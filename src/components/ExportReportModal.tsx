@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { FileText, Download, Printer, X, Check, Truck, Box } from 'lucide-react';
-import { Projeto, Equipamento, DailyPhase } from '../types/setgear';
+import { FileText, Printer, X, Truck, Box } from 'lucide-react';
+import type { Projeto, Equipamento } from '../types/setgear';
+import { APP_NOME } from '../config/app';
 
 interface ExportReportModalProps {
   isOpen: boolean;
@@ -8,7 +9,6 @@ interface ExportReportModalProps {
   project: Projeto;
   dailyDate: string;
   equipments: Equipamento[];
-  activePhase: DailyPhase;
 }
 
 export const ExportReportModal: React.FC<ExportReportModalProps> = ({
@@ -17,7 +17,6 @@ export const ExportReportModal: React.FC<ExportReportModalProps> = ({
   project,
   dailyDate,
   equipments,
-  activePhase,
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +73,7 @@ export const ExportReportModal: React.FC<ExportReportModalProps> = ({
           
           <div className="bg-[#2a2a2a] p-4 rounded-2xl border border-[#383838] space-y-2">
             <h4 className="text-sm font-bold text-[#00A3FF] uppercase tracking-wide">
-              🎬 Lumavi SetGear — Relatório Técnico de Diária
+              🎬 {APP_NOME} — Relatório Técnico de Diária
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[#B0B0B0] pt-1">
               <div><span className="text-white font-bold">Diretor:</span> {project.diretor || 'N/I'}</div>

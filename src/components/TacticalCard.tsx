@@ -11,12 +11,20 @@ import {
   Check,
   AlertTriangle
 } from 'lucide-react';
-import { Equipamento, ItemLocationStatus, BatteryStatus, UserRole, DailyPhase } from '../types/setgear';
+import type { Equipamento, ItemLocationStatus, DailyPhase } from '../types/setgear';
 import { store } from '../services/store';
 
+/**
+ * Nota: este card recebia `userRole` e nunca o usava — quem decide se pode
+ * editar é `store.canUserEditEquipment(item)`, logo abaixo. A prop foi removida
+ * porque dava a impressão de haver controle por papel aqui, e não havia.
+ *
+ * O controle real ainda é fraco: o store compara o nome do dono com o nome do
+ * usuário por substring ("Ana" casa com "Mariana"). Corrigir isso é da Fase 2,
+ * quando entra autenticação de verdade — ver §1.3 e Fase 2 do PLANO.md.
+ */
 interface TacticalCardProps {
   item: Equipamento;
-  userRole: UserRole;
   activePhase?: DailyPhase;
   onUpdateLocation: (id: string, status: ItemLocationStatus) => void;
   onBatteryCheckPrompt?: (equipment: Equipamento) => void;
@@ -25,7 +33,6 @@ interface TacticalCardProps {
 
 export const TacticalCard: React.FC<TacticalCardProps> = ({
   item,
-  userRole,
   activePhase = 'saida',
   onUpdateLocation,
   onBatteryCheckPrompt,

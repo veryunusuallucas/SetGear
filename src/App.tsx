@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   HeaderNavbar 
 } from './components/HeaderNavbar';
@@ -49,13 +49,12 @@ import {
 } from './components/AlertDialog';
 
 import { store } from './services/store';
-import { 
+import type { 
   Equipamento, 
   DailyPhase, 
-  ItemLocationStatus, 
-  BatteryStatus, 
+  ItemLocationStatus,
   UserRole,
-  ActiveView 
+  ActiveView
 } from './types/setgear';
 import { 
   Truck, 
@@ -85,7 +84,9 @@ export function App() {
   // Visão Inicial Pós-Login: ProjectManager
   const [activeView, setActiveView] = useState<ActiveView>('projects');
   
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // Sem setter de propósito: não existe UI para trocar a categoria, então o
+  // filtro é sempre 'all'. Deixar o setter aqui sugeria uma feature que não há.
+  const [selectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Modais de Prompt e Interação
@@ -123,7 +124,7 @@ export function App() {
   const voltaDone = store.isVoltaComplete();
   const isDailyFinished = saidaDone && voltaDone;
 
-  // Handlers de Autenticação Lumavi
+  // Handlers de Autenticação
   const handleAuthenticate = (role: UserRole, userName: string) => {
     store.setUserRole(role);
     store.setActiveUserName(userName);
@@ -249,7 +250,6 @@ export function App() {
         userName={activeUser.nome}
         projectName={project.nome}
         dailyDate={daily.data_diaria}
-        activeView={activeView}
         onChangeView={(view) => setActiveView(view)}
         onLockApp={handleLockApp}
       />
@@ -261,7 +261,6 @@ export function App() {
           <ProjectManagerView
             projects={projects}
             activeProject={project}
-            equipments={masterEquipments}
             onSelectProject={(id) => store.setActiveProject(id)}
             onEnterProjectDaily={(id) => {
               store.setActiveProject(id);
@@ -502,7 +501,6 @@ export function App() {
                       <TacticalCard
                         key={item.id}
                         item={item}
-                        userRole={userRole}
                         activePhase={activePhase}
                         onUpdateLocation={handleUpdateLocation}
                         onBatteryCheckPrompt={(equip) => setBatteryPromptEquipment(equip)}
@@ -562,7 +560,6 @@ export function App() {
         project={project}
         dailyDate={daily.data_diaria}
         equipments={equipments}
-        activePhase={activePhase}
       />
 
       <ContainerPromptModal
