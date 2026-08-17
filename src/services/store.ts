@@ -16,6 +16,7 @@ import type {
   Profile,
   DailyPhase,
   BugReport,
+  Checagem,
 } from '../types/setgear';
 
 /**
@@ -39,6 +40,20 @@ import type {
 /** Chave do espelho de status. O par (diária, equipamento) é o que identifica. */
 function chaveStatus(diariaId: string, equipamentoId: string): string {
   return `${diariaId}|${equipamentoId}`;
+}
+
+/**
+ * Id único sem depender do relógio.
+ *
+ * `crypto.randomUUID` existe no navegador e no Node moderno. O fallback cobre
+ * contexto sem `crypto` seguro (http em rede local, que é cenário real quando se
+ * testa o app pelo celular no set).
+ */
+function novoId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function ehBateria(equip: Equipamento | undefined): boolean {
@@ -67,6 +82,16 @@ export class SetGearStore {
   private projects: Projeto[] = [];
   private dailies: Diaria[] = [];
   private statuses = new Map<string, DiariaItemStatus>();
+  private checagens: Checagem[] = [];
+
+  /**
+   * Próximo número de sequência do rastro.
+   *
+   * Retomado de `max(seq) + 1` ao carregar, para que o contador não reinicie a
+   * cada abertura do app e volte a empatar com o que já está gravado.
+   */
+  private proximoSeq = 1;
+
   private bugReports: BugReport[] = [];
   private passwords: { adminPass: string; opPass: string } = { adminPass: 'admin123', opPass: 'op123' };
   private senhasConfiguradas = false;
@@ -159,18 +184,22 @@ export class SetGearStore {
   }
 
   private async recarregarEspelho(): Promise<void> {
-    const [equipamentos, projetos, diarias, status, bugs] = await Promise.all([
+    const [equipamentos, projetos, diarias, status, checagens, bugs] = await Promise.all([
       db.equipamentos.toArray(),
       db.projetos.toArray(),
       db.diarias.toArray(),
       db.diaria_itens_status.toArray(),
+      db.checagens.toArray(),
       db.bugs.toArray(),
     ]);
 
     this.equipments = equipamentos;
     this.projects = projetos;
     this.dailies = diarias;
+    this.checagens = checagens;
     this.bugReports = bugs;
+
+    this.proximoSeq = checagens.reduce((maior, c) => Math.max(maior, c.seq ?? 0), 0) + 1;
 
     this.statuses.clear();
     for (const st of status) {
@@ -447,6 +476,8 @@ export class SetGearStore {
           validado_por_qr: st?.validado_por_qr ?? false,
           bateria_alerta_100: st?.bateria_alerta_100 ?? false,
           bateria_carregando: st?.bateria_carregando ?? false,
+          conferido_por: st?.conferido_por,
+          conferido_em: st?.conferido_em,
         };
       });
   }
@@ -545,29 +576,94 @@ export class SetGearStore {
       return;
     }
 
-    const marcar = (id: string) => {
+    const agora = new Date().toISOString();
+    const quem = this.activeUser.nome || 'não identificado';
+
+    const marcar = (id: string, emCascata: boolean) => {
+      const equip = this.equipments.find(e => e.id === id);
       const atual =
         this.statuses.get(chaveStatus(diaria.id, id)) ??
-        statusNovo(diaria.id, id, ehBateria(this.equipments.find(e => e.id === id)));
+        statusNovo(diaria.id, id, ehBateria(equip));
+
+      // Remarcar para o mesmo status não é acontecimento: sem esta guarda, abrir
+      // a tela e tocar duas vezes no mesmo botão encheria o histórico de linhas
+      // idênticas, e um histórico ruidoso não é consultado.
+      if (atual.status_locacao !== newStatus) {
+        this.registrarChecagem({
+          // Id aleatório, e não derivado do relógio: `chk-${Date.now()}-${id}`
+          // colidia entre duas conferências do mesmo item no mesmo
+          // milissegundo, e o `put` sobrescrevia a primeira — o log PERDIA
+          // linha, que é a única coisa que um append-only não pode fazer.
+          id: novoId(),
+          seq: this.proximoSeq++,
+          diaria_id: diaria.id,
+          equipamento_id: id,
+          equipamento_nome: equip?.nome ?? id,
+          de: atual.status_locacao,
+          para: newStatus,
+          via_qr: viaQR,
+          em_cascata: emCascata,
+          por_nome: quem,
+          em: agora,
+        });
+      }
 
       this.gravarStatus({
         ...atual,
         status_locacao: newStatus,
         validado_por_qr: viaQR || atual.validado_por_qr,
-        updated_at: new Date().toISOString(),
+        conferido_por: quem,
+        conferido_em: agora,
+        updated_at: agora,
       });
     };
 
-    marcar(equipmentId);
+    marcar(equipmentId, false);
 
     // Check em cascata: marcar o container marca o que está dentro dele.
     if (alvo?.e_container) {
       for (const filho of this.equipments.filter(e => e.container_pai_id === equipmentId)) {
-        if (this.canUserEditEquipment(filho)) marcar(filho.id);
+        if (this.canUserEditEquipment(filho)) marcar(filho.id, true);
       }
     }
 
     this.notify();
+  }
+
+  // =====================================================================
+  // RASTRO DE CONFERÊNCIA
+  // =====================================================================
+
+  private registrarChecagem(c: Checagem): void {
+    this.checagens.push(c);
+    this.enfileirar(() => db.checagens.put(c));
+  }
+
+  /**
+   * Mais recente primeiro.
+   *
+   * Ordena por `em` e desempata por `seq`. Sem o desempate, uma cascata de
+   * container — que marca vários itens no mesmo milissegundo — sairia em ordem
+   * arbitrária, e o histórico de uma mala aberta ficaria ilegível.
+   */
+  private maisRecentePrimeiro(a: Checagem, b: Checagem): number {
+    const porTempo = b.em.localeCompare(a.em);
+    return porTempo !== 0 ? porTempo : b.seq - a.seq;
+  }
+
+  /** Histórico da diária ativa. */
+  public getChecagensDaDiaria(): Checagem[] {
+    const diariaId = this.getActiveDaily().id;
+    return this.checagens
+      .filter(c => c.diaria_id === diariaId)
+      .sort((a, b) => this.maisRecentePrimeiro(a, b));
+  }
+
+  /** Por onde um equipamento andou, em todas as diárias. */
+  public getChecagensDoEquipamento(equipamentoId: string): Checagem[] {
+    return this.checagens
+      .filter(c => c.equipamento_id === equipamentoId)
+      .sort((a, b) => this.maisRecentePrimeiro(a, b));
   }
 
   public updateByQRCode(

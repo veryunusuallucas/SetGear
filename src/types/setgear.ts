@@ -50,6 +50,8 @@ export interface Equipamento {
   validado_por_qr?: boolean;
   bateria_alerta_100?: boolean;
   bateria_carregando?: boolean;
+  conferido_por?: string;
+  conferido_em?: string;
 }
 
 export interface Projeto {
@@ -87,6 +89,56 @@ export interface DiariaItemStatus {
   bateria_alerta_100?: boolean;
   bateria_carregando?: boolean;
   updated_at?: string;
+
+  /**
+   * Quem foi o último a conferir este item, e quando.
+   *
+   * Enquanto a conta de fotografia é compartilhada, é o nome DECLARADO na tela
+   * de entrada — não verificado. Ainda assim vale: sem isto, "quem conferiu"
+   * responde "fotografia", e é justamente essa a pergunta que se faz quando
+   * falta equipamento. Quando cada pessoa tiver a própria conta, o campo passa a
+   * ser confiável e o histórico antigo continua legível.
+   */
+  conferido_por?: string;
+  conferido_em?: string;
+}
+
+/**
+ * Registro append-only de cada conferência.
+ *
+ * O `DiariaItemStatus` guarda o estado atual — responde "onde está". Este log
+ * guarda a sequência — responde "o que aconteceu". São perguntas diferentes: um
+ * item que foi marcado no carro, desmarcado e marcado de novo tem um estado só e
+ * três acontecimentos, e quando falta equipamento é a sequência que conta a
+ * história.
+ *
+ * Nunca é alterado nem apagado, só acrescentado.
+ */
+export interface Checagem {
+  id: string;
+
+  /**
+   * Contador local, estritamente crescente. Serve para ORDENAR.
+   *
+   * O `em` abaixo tem resolução de milissegundo, e uma cascata de container
+   * marca vários itens dentro do mesmo milissegundo — pelo carimbo de tempo eles
+   * empatam e a ordem sai embaralhada. O contador desempata.
+   *
+   * É por aparelho: comparar `seq` entre dois celulares não significa nada. Para
+   * ordenar entre aparelhos vale o `em`, e o empate ali é ambíguo de verdade.
+   */
+  seq: number;
+
+  diaria_id: string;
+  equipamento_id: string;
+  equipamento_nome: string;
+  de: ItemLocationStatus | null;
+  para: ItemLocationStatus;
+  via_qr: boolean;
+  /** Marcado em cascata pelo container pai, e não item por item. */
+  em_cascata: boolean;
+  por_nome: string;
+  em: string;
 }
 
 export interface BugReport {

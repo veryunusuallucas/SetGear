@@ -6,6 +6,7 @@ import type {
   Diaria,
   DiariaItemStatus,
   BugReport,
+  Checagem,
 } from '../types/setgear';
 
 /**
@@ -32,6 +33,7 @@ export class SetGearDB extends Dexie {
   projetos!: Table<Projeto, string>;
   diarias!: Table<Diaria, string>;
   diaria_itens_status!: Table<DiariaItemStatus, [string, string]>;
+  checagens!: Table<Checagem, string>;
   bugs!: Table<BugReport, string>;
   configuracoes!: Table<Configuracao, string>;
 
@@ -63,6 +65,23 @@ export class SetGearDB extends Dexie {
       bugs: 'id, data_criacao',
 
       configuracoes: 'chave',
+    });
+
+    // v2 — o rastro de conferência.
+    //
+    // Versão nova em vez de mexer na v1, mesmo o app ainda não estando no ar:
+    // quem já abriu a v1 (o navegador de desenvolvimento) tem um banco com o
+    // schema antigo, e o Dexie recusa a abertura se o schema mudar sem subir a
+    // versão. Acrescentar tabela é migração automática — não há dado a converter.
+    //
+    // `conferido_por` e `conferido_em` entraram em `diaria_itens_status` sem
+    // aparecer aqui de propósito: não são índices, e o Dexie só declara neste
+    // lugar o que serve para busca. Campo não indexado é gravado de qualquer
+    // forma.
+    this.version(2).stores({
+      // Indexado por diária (para montar o histórico da diária) e por
+      // equipamento (para responder "onde este item andou").
+      checagens: 'id, diaria_id, equipamento_id, em, [diaria_id+equipamento_id]',
     });
   }
 }

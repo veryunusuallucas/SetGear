@@ -274,6 +274,110 @@ describe('leitura de QR', () => {
   });
 });
 
+describe('rastro de conferência', () => {
+  it('grava quem conferiu e quando', () => {
+    store.setActiveUserName('Pedro');
+    montarDiariaCompleta();
+
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+
+    const item = store.getDailyEquipments().find(e => e.id === 'item-401');
+    const log = store.getChecagensDoEquipamento('item-401');
+
+    expect(log).toHaveLength(1);
+    expect(log[0].por_nome).toBe('Pedro');
+    expect(log[0].de).toBe('pendente_base');
+    expect(log[0].para).toBe('no_carro_ida');
+    expect(log[0].em_cascata).toBe(false);
+    // O estado atual também sabe responder, sem precisar varrer o log.
+    expect(item?.conferido_por).toBe('Pedro');
+    expect(item?.conferido_em).toBeTruthy();
+  });
+
+  it('distingue o que foi marcado em cascata do que foi item por item', () => {
+    // Importa quando falta equipamento: "conferiram a mala" e "conferiram esta
+    // lente" são afirmações de confiança bem diferentes.
+    montarDiariaCompleta();
+
+    store.updateItemLocationStatus('cont-01', 'no_carro_ida');
+
+    expect(store.getChecagensDoEquipamento('cont-01')[0].em_cascata).toBe(false);
+    expect(store.getChecagensDoEquipamento('item-101')[0].em_cascata).toBe(true);
+    expect(store.getChecagensDoEquipamento('item-102')[0].em_cascata).toBe(true);
+  });
+
+  it('marca via_qr só no que foi escaneado', () => {
+    store.updateByQRCode('CONTAINER-RED-01', 'no_carro_ida');
+
+    expect(store.getChecagensDoEquipamento('cont-01')[0].via_qr).toBe(true);
+    expect(store.getChecagensDoEquipamento('item-101')[0].via_qr).toBe(true);
+  });
+
+  it('remarcar para o mesmo status não gera linha nova', () => {
+    montarDiariaCompleta();
+
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+
+    expect(store.getChecagensDoEquipamento('item-401')).toHaveLength(1);
+  });
+
+  it('registra a sequência quando o item vai e volta', () => {
+    montarDiariaCompleta();
+
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    store.updateItemLocationStatus('item-401', 'pendente_base');
+    store.updateItemLocationStatus('item-401', 'no_carro_volta');
+
+    const log = store.getChecagensDoEquipamento('item-401');
+    expect(log).toHaveLength(3);
+    // Mais recente primeiro.
+    expect(log.map(c => c.para)).toEqual(['no_carro_volta', 'pendente_base', 'no_carro_ida']);
+  });
+
+  it('o histórico é por diária', () => {
+    montarDiariaCompleta();
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    expect(store.getChecagensDaDiaria()).toHaveLength(1);
+
+    store.setDailyDate('19/07');
+    expect(store.getChecagensDaDiaria()).toHaveLength(0);
+
+    store.addEquipmentToDaily('item-401', false);
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    expect(store.getChecagensDaDiaria()).toHaveLength(1);
+    // O item acumula as duas, porque a pergunta "onde este item andou"
+    // atravessa diárias.
+    expect(store.getChecagensDoEquipamento('item-401')).toHaveLength(2);
+  });
+
+  it('o rastro sobrevive a um recarregamento', async () => {
+    store.setActiveUserName('Pedro');
+    montarDiariaCompleta();
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    await store.aguardarGravacoes();
+
+    await store.recarregarDoZero();
+
+    const log = store.getChecagensDoEquipamento('item-401');
+    expect(log).toHaveLength(1);
+    expect(log[0].por_nome).toBe('Pedro');
+  });
+
+  it('guarda o nome do equipamento, para o log sobreviver a exclusão', async () => {
+    // Sem o nome copiado, apagar o item deixaria o histórico dizendo apenas
+    // "eq-1755..." — e o registro serve exatamente para depois.
+    montarDiariaCompleta();
+    store.updateItemLocationStatus('item-401', 'no_carro_ida');
+    store.deleteEquipment('item-401');
+    await store.aguardarGravacoes();
+
+    const log = store.getChecagensDoEquipamento('item-401');
+    expect(log[0].equipamento_nome).toContain('Sachtler');
+  });
+});
+
 describe('permissão do operador', () => {
   it('nome vazio não dá acesso a tudo', () => {
     // `qualquerCoisa.includes('')` é sempre verdadeiro — sem a guarda, um
