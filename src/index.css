@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0f0f0f;       /* Very dark background */
+  --bg-surface: #1a1a1a;       /* Card/surface background */
+  --accent-primary: #00A3FF;   /* Vibrant blue (Samsung-like) */
+  --accent-success: #2ED5A0;   /* Soft green for success/ready */
+  --accent-warning: #FFB84D;   /* Soft orange for pending */
+  --text-primary: #FFFFFF;     /* Primary text */
+  --text-secondary: #B0B0B0;   /* Secondary/muted text */
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Roboto', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  }
+}
+
+/* --- REUSABLE COMPONENTS ONE UI / MATERIAL YOU --- */
+
+/* 1. Card Container (ui-card) */
+.ui-card {
+  background-color: var(--bg-surface);  /* #1a1a1a */
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #2a2a2a;
+}
+
+.ui-card:active {
+  transform: scale(0.99);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 2. Primary Button (ui-btn-primary) */
+.ui-btn-primary {
+  background-color: var(--accent-primary);  /* #00A3FF */
+  border-radius: 24px;
+  font-weight: 700;
+  color: white;
+  transition: all 0.2s ease;
+  padding: 12px 20px;
+}
+
+.ui-btn-primary:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.ui-btn-primary:disabled {
+  background-color: #333333;
+  color: #777777;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 3. Secondary Button (ui-btn-secondary) */
+.ui-btn-secondary {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  padding: 10px 16px;
+}
+
+.ui-btn-secondary:hover {
+  background-color: #383838;
+  color: var(--text-primary);
+}
+
+/* 4. Status Badge (Pill-shaped) */
+.status-badge {
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.status-badge-success {
+  background-color: var(--accent-success); /* #2ED5A0 */
+  color: #0f0f0f;
+}
+
+.status-badge-warning {
+  background-color: var(--accent-warning); /* #FFB84D */
+  color: #0f0f0f;
+}
+
+.status-badge-done {
+  background-color: #333333;
+  color: var(--text-secondary);
+}
+
+/* 5. Navigation Pills (Active/Inactive) */
+.ui-pill-active {
+  background-color: var(--accent-primary);  /* #00A3FF */
+  color: white;
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-weight: 600;
+}
+
+.ui-pill-inactive {
+  background-color: #2a2a2a;
+  color: var(--text-secondary);
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-weight: 500;
+}
+
+.ui-pill-inactive:hover {
+  background-color: #333333;
+  color: white;
+}
+
+/* Custom Scrollbar for One UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00A3FF;
+}
