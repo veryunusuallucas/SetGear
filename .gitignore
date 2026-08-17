@@ -26,6 +26,13 @@ dist-ssr
 # Variáveis de ambiente (segredos) — nunca versionar
 .env
 .env.*
+
+# Qualquer arquivo terminado em .env, inclusive com nome e espaço antes
+# ("SUPABASE KEYS.env"). Sem esta linha um arquivo assim fica de fora dos
+# padrões acima e entra num `git add -A` — que num repositório público significa
+# publicar a chave. Já aconteceu uma vez aqui.
+*.env
+
 !.env.example
 
 # Custom Ignored Folders
